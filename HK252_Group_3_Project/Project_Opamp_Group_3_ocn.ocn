@@ -1,0 +1,446 @@
+(procedure khoitao() 
+  simulator('spectre)
+  design("/home/disk/simulation/SIM_IC61/tb_opamp/spectre/schematic/netlist/netlist")
+  resultsDir("/home/disk/simulation/SIM_IC61/tb_opamp/spectre/schematic/netlist/output_apr11")
+  modelFile( 
+    '("/home/hoangtrang/Thu_vien_PDK/PDK_CRN65LP_v1.7a_Official_IC61_20120914_all/PDK_CRN65LP_v1.7a_Official_IC61_20120914/tsmcN65/../models/spectre/toplevel.scs" "tt_lib")
+  )
+ 
+  fin=infile("./tb_core_param.txt")
+
+  fscanf(fin "%f" ibn_in)       ;; integer number
+  fscanf(fin "%f" ibp_in)       ;; integer number
+  fscanf(fin "%f" rm_in)       ;; integer number
+  fscanf(fin "%f" cm_in)       ;; integer number
+  fscanf(fin "%f" fg_core_n1_in)       ;; integer number
+  fscanf(fin "%f" fg_core_n3_in)       ;; integer number
+  fscanf(fin "%f" fg_core_nd1_in)       ;; integer number
+  fscanf(fin "%f" fg_core_p3_in)       ;; integer number
+  fscanf(fin "%f" fg_core_mpp_in)       ;; integer number
+  fscanf(fin "%f" m_core_mpp_in)       ;; integer number
+  fscanf(fin "%f" stk_core_n1_in)       ;; integer number
+  fscanf(fin "%f" stk_core_n3_in)       ;; integer number
+  fscanf(fin "%f" stk_core_nd1_in)       ;; integer number
+  fscanf(fin "%f" stk_core_p3_in)       ;; integer number
+  fscanf(fin "%f" stk_core_mpp_in)       ;; integer number
+  fscanf(fin "%f" vddval_in)
+  fscanf(fin "%f" vrefval_in)
+  fscanf(fin "%f" offset_in)
+  fscanf(fin "%d" min_load_in)
+  fscanf(fin "%d" max_load_in)
+
+  close(fin)
+)
+
+(procedure chay()
+  analysis('dc ?saveOppoint t  )
+  analysis('ac ?start "1"  ?stop "10G"  )
+  analysis('stb ?start "1"  ?stop "10G"  ?probe "/IPRB0"  )
+  analysis('tran ?stop "1u"  ?errpreset "conservative"  )
+  
+  desVar(  "stk_core_nd1" stk_core_nd1_in)
+  desVar(  "fg_core_nd1" fg_core_nd1_in)
+  desVar(  "stk_core_n1" stk_core_n1_in)
+  desVar(  "fg_core_n1" fg_core_n1_in)
+  desVar(  "stk_core_n3" stk_core_n3_in)
+  desVar(  "fg_core_n3" fg_core_n3_in)
+  desVar(  "stk_core_p3" stk_core_p3_in)
+  desVar(  "fg_core_p3" fg_core_p3_in)
+  desVar(  "stk_core_mpp" stk_core_mpp_in)
+  desVar(  "fg_core_mpp" fg_core_mpp_in)
+  desVar(  "m_core_mpp" m_core_mpp_in)
+  desVar(  "ibn" ibn_in)
+  desVar(  "ibp" ibp_in)
+  desVar(  "rm" rm_in)
+  desVar(  "cm" cm_in)
+  desVar(  "vddval" vddval_in)
+  desVar(  "vrefval" vrefval_in)
+  desVar(  "offset" offset_in)
+  desVar(  "min_load" min_load_in)
+  desVar(  "max_load" max_load_in)
+  
+  ;envOption('analysisOrder  list("stb" "tran" "ac" "dc"))
+  envOption('analysisOrder  list("dc" "tran" "ac" "stb"))
+  ;option( ?categ 'turboOpts 'uniMode  "APS" 'numThreads "2") 
+
+  temp( 25 ) 
+  run()
+  ;;; ===== THÊM DEBUG CODE Ở ĐÂY =====
+  printf("\n=== DEBUG INFORMATION ===\n")
+  printf("=== Checking input vars ===\n")
+  printf( "stk_core_nd1: %f\n", stk_core_nd1_in)
+  printf( "fg_core_nd1: %f\n", fg_core_nd1_in)
+  printf( "stk_core_n1: %f\n", stk_core_n1_in)
+  printf( "fg_core_n1: %f\n", fg_core_n1_in)
+  printf( "stk_core_n3: %f\n", stk_core_n3_in)
+  printf( "fg_core_n3: %f\n", fg_core_n3_in)
+  printf( "stk_core_p3: %f\n", stk_core_p3_in)
+  printf( "fg_core_p3: %f\n", fg_core_p3_in)
+  printf( "stk_core_mpp: %f\n", stk_core_mpp_in)
+  printf( "fg_core_mpp: %f\n", fg_core_mpp_in)
+  printf( "m_core_mpp: %f\n", m_core_mpp_in)
+  printf( "ibn: %f\n", ibn_in)
+  printf( "ibp: %f\n", ibp_in)
+  printf( "rm: %f\n", rm_in)
+  printf( "cm: %f\n", cm_in)
+  printf( "vddval: %f\n", vddval_in)
+  printf( "vrefval: %f\n", vrefval_in)
+  printf( "offset: %f\n", offset_in)
+  printf( "min_load: %d\n", min_load_in)
+  printf( "max_load: %d\n", max_load_in)
+
+  printf("=== Checking Available Nodes ===\n")
+  
+  ; Kiểm tra các transistor trong core_maxload
+  printf("\n--- core_maxload transistors ---\n")
+  printf("MND1 region: %L V\n", OP("/core_maxload/MND1" "region"))
+  printf("MND1 vgs: %L V\n", OP("/core_maxload/MND1" "vgs"))
+  printf("MND1 vds: %L V\n", OP("/core_maxload/MND1" "vds"))
+  printf("MND1 vgt: %L V\n", OP("/core_maxload/MND1" "vgt"))
+  
+  printf("\nMN1 region: %L\n", OP("/core_maxload/MN1" "region"))
+  printf("MN1 vgs: %L V\n", OP("/core_maxload/MN1" "vgs"))
+  printf("MN1 vds: %L V\n", OP("/core_maxload/MN1" "vds"))
+
+  printf("\nMN3 region: %L\n", OP("/core_maxload/MN3" "region"))
+  printf("MN3 vgs: %L V\n", OP("/core_maxload/MN3" "vgs"))
+  printf("MN3 vds: %L V\n", OP("/core_maxload/MN3" "vds"))
+
+  printf("\nMP3 region: %L\n", OP("/core_maxload/MP3" "region"))
+  printf("MP3 vgs: %L V\n", OP("/core_maxload/MP3" "vgs"))
+  printf("MP3 vds: %L V\n", OP("/core_maxload/MP3" "vds"))
+  
+  printf("\nMPP region: %L\n", OP("/core_maxload/MPP" "region"))
+  printf("MPP vgs: %L V\n", OP("/core_maxload/MPP" "vgs"))
+  printf("MPP vds: %L V\n", OP("/core_maxload/MPP" "vds"))
+  
+  ; Kiểm tra điện áp output
+  printf("\n--- Output Voltages ---\n")
+
+;;; Lấy giá trị số từ AC analysis
+  vreg1_val = value(db(vfreq('ac "/vreg_1")) 1e6)
+  vreg2_val = value(db(vfreq('ac "/vreg_2")) 1e6)
+  ;vreg1_val = value(vfreq('ac "/vreg_1") 1e6)
+  ;vreg2_val = value(vfreq('ac "/vreg_2") 1e6)
+
+  if(vreg1_val != nil then
+      printf("PSRR of vreg_1 at 1MHz: %.2f dB\n", vreg1_val)
+  else
+      printf("PSRR of vreg_1 at 1MHz: NOT AVAILABLE\n")
+)
+
+  if(vreg2_val != nil then
+      printf("PSRR of vreg_2 at 1MHz: %.2f dB\n", vreg2_val)
+  else
+      printf("PSRR of vreg_2 at 1MHz: NOT AVAILABLE\n")
+)
+
+;;; Lấy giá trị số từ TRAN analysis
+  vreg3_val = value(vtime('tran "/vreg_3") 9.98e-07)
+  vreg4_val = value(vtime('tran "/vreg_4") 8e-09)
+  vreg5_val = value(vtime('tran "/vreg_5") 9.98e-07)
+
+  if(vreg3_val != nil then
+      printf("vreg_3 at 0.998us: %.6f V\n", vreg3_val)
+  else
+      printf("vreg_3 at 0.998us: NOT AVAILABLE\n")
+)
+
+  if(vreg4_val != nil then
+      printf("vreg_4 at 8ns: %.6f V\n", vreg4_val)
+  else
+      printf("vreg_4 at 8ns: NOT AVAILABLE\n")
+)
+
+  if(vreg5_val != nil then
+      printf("vreg_5 at 0.998us: %.6f V\n", vreg5_val)
+  else
+      printf("vreg_5 at 0.998us: NOT AVAILABLE\n")
+)
+  
+  ; Kiểm tra STB analysis
+  printf("\n--- Stability Analysis ---\n")
+  loopGainData = getData("loopGain" ?result "stb")
+  ;printf("loopGainData: %f\n", loopGainData)
+  if(loopGainData != nil then
+      printf("loopGain data exists\n")
+      Av = value(db(mag(loopGainData)) 1)
+      printf("Av: %f\n", Av)
+      magDB = db(mag(loopGainData))
+      ;UGB_cross = cross(magDB 0 1 "either" nil nil)
+      ;newWindow()
+      ;plot(loopGainData ?expr '("Loop Gain"))
+      UGB = cross(db(mag(getData("loopGain" ?result "stb"))) 0 1 "either" nil nil)
+      if(UGB != nil then
+          printf("UGB found at %L Hz\n", UGB)
+      else
+          printf("No UGB crossing found\n")
+      )
+  else
+      printf("ERROR: No loopGain data found. Check if IPRB0 probe exists.\n")
+  )
+  
+;;; Kiểm tra dòng tải
+    printf("\n--- Load Current ---\n")
+    load_current = OP("rload_maxload" "i")
+    if(load_current != nil then
+        printf("rload_maxload current: %e A (%.2f uA)\n", load_current, abs(load_current*1e6))
+    else
+        printf("ERROR: Cannot find rload_maxload node\n")
+)
+  
+  printf("\n=== End Debug ===\n")
+  ;;; ===== KẾT THÚC DEBUG =====
+;;;;;;;;;;;;;;;;;;
+;;; DCOP check ;;;
+;;;;;;;;;;;;;;;;;;
+  region_maxload_MND1 = OP("/core_maxload/MND1" "region")
+  region_maxload_MND2 = OP("/core_maxload/MND2" "region")
+  region_maxload_MN1  = OP("/core_maxload/MN1" "region")
+  region_maxload_MN2  = OP("/core_maxload/MN2" "region")
+  region_maxload_MN3  = OP("/core_maxload/MN3" "region")
+  region_maxload_MN4  = OP("/core_maxload/MN4" "region")
+  region_maxload_MP3  = OP("/core_maxload/MP3" "region")
+  region_maxload_MP4  = OP("/core_maxload/MP4" "region")
+  region_maxload_MPP  = OP("/core_maxload/MPP" "region")
+  region_minload_MND1 = OP("/core_minload/MND1" "region")
+  region_minload_MND2 = OP("/core_minload/MND2" "region")
+  region_minload_MN1  = OP("/core_minload/MN1" "region")
+  region_minload_MN2  = OP("/core_minload/MN2" "region")
+  region_minload_MN3  = OP("/core_minload/MN3" "region")
+  region_minload_MN4  = OP("/core_minload/MN4" "region")
+  region_minload_MP3  = OP("/core_minload/MP3" "region")
+  region_minload_MP4  = OP("/core_minload/MP4" "region")
+  region_minload_MPP  = OP("/core_minload/MPP" "region")
+
+  procedure(safe_vgt(x)
+    if(x != nil then x else nil)
+  )
+  
+  vgt_maxload_MND1 = safe_vgt(OP("/core_maxload/MND1" "vgt"))
+  vgt_maxload_MND2 = safe_vgt(OP("/core_maxload/MND2" "vgt"))
+  vgt_maxload_MN1  = safe_vgt(OP("/core_maxload/MN1"  "vgt"))
+  vgt_maxload_MN2  = safe_vgt(OP("/core_maxload/MN2"  "vgt"))
+  vgt_maxload_MN3  = safe_vgt(OP("/core_maxload/MN3"  "vgt"))
+  vgt_maxload_MN4  = safe_vgt(OP("/core_maxload/MN4"  "vgt"))
+  vgt_maxload_MP3  = safe_vgt(OP("/core_maxload/MP3"  "vgt"))
+  vgt_maxload_MP4  = safe_vgt(OP("/core_maxload/MP4"  "vgt"))
+  vgt_maxload_MPP  = safe_vgt(OP("/core_maxload/MPP"  "vgt"))
+  vgt_minload_MND1 = safe_vgt(OP("/core_minload/MND1" "vgt"))
+  vgt_minload_MND2 = safe_vgt(OP("/core_minload/MND2" "vgt"))
+  vgt_minload_MN1  = safe_vgt(OP("/core_minload/MN1"  "vgt"))
+  vgt_minload_MN2  = safe_vgt(OP("/core_minload/MN2"  "vgt"))
+  vgt_minload_MN3  = safe_vgt(OP("/core_minload/MN3"  "vgt"))
+  vgt_minload_MN4  = safe_vgt(OP("/core_minload/MN4"  "vgt"))
+  vgt_minload_MP3  = safe_vgt(OP("/core_minload/MP3"  "vgt"))
+  vgt_minload_MP4  = safe_vgt(OP("/core_minload/MP4"  "vgt"))
+  vgt_minload_MPP  = safe_vgt(OP("/core_minload/MPP"  "vgt"))
+  
+  vmarg_maxload_MND1 = OP("/core_maxload/MND1" "vsat_marg") 
+  vmarg_maxload_MND2 = OP("/core_maxload/MND2" "vsat_marg") 
+  vmarg_maxload_MN1  = OP("/core_maxload/MN1"  "vsat_marg") 
+  vmarg_maxload_MN2  = OP("/core_maxload/MN2"  "vsat_marg") 
+  vmarg_maxload_MN3  = OP("/core_maxload/MN3"  "vsat_marg") 
+  vmarg_maxload_MN4  = OP("/core_maxload/MN4"  "vsat_marg") 
+  vmarg_maxload_MP3  = OP("/core_maxload/MP3"  "vsat_marg") 
+  vmarg_maxload_MP4  = OP("/core_maxload/MP4"  "vsat_marg") 
+  vmarg_maxload_MPP  = OP("/core_maxload/MPP"  "vsat_marg") 
+  vmarg_minload_MND1 = OP("/core_minload/MND1" "vsat_marg") 
+  vmarg_minload_MND2 = OP("/core_minload/MND2" "vsat_marg") 
+  vmarg_minload_MN1  = OP("/core_minload/MN1"  "vsat_marg") 
+  vmarg_minload_MN2  = OP("/core_minload/MN2"  "vsat_marg") 
+  vmarg_minload_MN3  = OP("/core_minload/MN3"  "vsat_marg") 
+  vmarg_minload_MN4  = OP("/core_minload/MN4"  "vsat_marg") 
+  vmarg_minload_MP3  = OP("/core_minload/MP3"  "vsat_marg") 
+  vmarg_minload_MP4  = OP("/core_minload/MP4"  "vsat_marg") 
+  vmarg_minload_MPP  = OP("/core_minload/MPP"  "vsat_marg") 
+
+  procedure(safe_cond(region, vgt, vmarg)
+    if(region == 2 then
+      1
+    else
+      if(region == 3 && vgt != nil && vgt >= -0.1 && vmarg != nil && vmarg >= 0.0 then
+        1
+      else
+        0
+      )
+    )
+  )
+  
+  dcop_maxload_MND1 = safe_cond(region_maxload_MND1, vgt_maxload_MND1, vmarg_maxload_MND1)
+  dcop_maxload_MND2 = safe_cond(region_maxload_MND2, vgt_maxload_MND2, vmarg_maxload_MND2)
+  dcop_maxload_MN1  = safe_cond(region_maxload_MN1, vgt_maxload_MN1, vmarg_maxload_MN1)
+  dcop_maxload_MN2  = safe_cond(region_maxload_MN2, vgt_maxload_MN2, vmarg_maxload_MN2)
+  dcop_maxload_MN3  = safe_cond(region_maxload_MN3, vgt_maxload_MN3, vmarg_maxload_MN3)
+  dcop_maxload_MN4  = safe_cond(region_maxload_MN4, vgt_maxload_MN4, vmarg_maxload_MN4)
+  dcop_maxload_MP3  = safe_cond(region_maxload_MP3, vgt_maxload_MP3, vmarg_maxload_MP3)
+  dcop_maxload_MP4  = safe_cond(region_maxload_MP4, vgt_maxload_MP4, vmarg_maxload_MP4)
+  dcop_maxload_MPP  = safe_cond(region_maxload_MPP, vgt_maxload_MPP, vmarg_maxload_MPP)
+  dcop_minload_MND1 = safe_cond(region_minload_MND1, vgt_minload_MND1, vmarg_minload_MND1)
+  dcop_minload_MND2 = safe_cond(region_minload_MND2, vgt_minload_MND2, vmarg_minload_MND2)
+  dcop_minload_MN1  = safe_cond(region_minload_MN1, vgt_minload_MN1, vmarg_minload_MN1)
+  dcop_minload_MN2  = safe_cond(region_minload_MN2, vgt_minload_MN2, vmarg_minload_MN2)
+  dcop_minload_MN3  = safe_cond(region_minload_MN3, vgt_minload_MN3, vmarg_minload_MN3)
+  dcop_minload_MN4  = safe_cond(region_minload_MN4, vgt_minload_MN4, vmarg_minload_MN4)
+  dcop_minload_MP3  = safe_cond(region_minload_MP3, vgt_minload_MP3, vmarg_minload_MP3)
+  dcop_minload_MP4  = safe_cond(region_minload_MP4, vgt_minload_MP4, vmarg_minload_MP4)
+  dcop_minload_MPP  = safe_cond(region_minload_MPP, vgt_minload_MPP, vmarg_minload_MPP)
+  
+  dcop_check = 1
+  if(dcop_maxload_MND1 == 0 then dcop_check = 0)
+  if(dcop_maxload_MND2 == 0 then dcop_check = 0)
+  if(dcop_maxload_MN1 == 0 then dcop_check = 0)
+  if(dcop_maxload_MN2 == 0 then dcop_check = 0)
+  if(dcop_maxload_MN3 == 0 then dcop_check = 0)
+  if(dcop_maxload_MN4 == 0 then dcop_check = 0)
+  if(dcop_maxload_MP3 == 0 then dcop_check = 0)
+  if(dcop_maxload_MP4 == 0 then dcop_check = 0)
+  if(dcop_maxload_MPP == 0 then dcop_check = 0)
+  if(dcop_minload_MND1 == 0 then dcop_check = 0)
+  if(dcop_minload_MND2 == 0 then dcop_check = 0)
+  if(dcop_minload_MN1 == 0 then dcop_check = 0)
+  if(dcop_minload_MN2 == 0 then dcop_check = 0)
+  if(dcop_minload_MN3 == 0 then dcop_check = 0)
+  if(dcop_minload_MN4 == 0 then dcop_check = 0)
+  if(dcop_minload_MP3 == 0 then dcop_check = 0)
+  if(dcop_minload_MP4 == 0 then dcop_check = 0)
+  if(dcop_minload_MPP == 0 then dcop_check = 0)
+  dcop_detail_maxload = list(
+    OP("/core_maxload/MND1" "region"),
+    OP("/core_maxload/MN1" "region"),
+    OP("/core_maxload/MN3" "region"),
+    OP("/core_maxload/MP3" "region"),
+    OP("/core_maxload/MPP" "region")
+)
+
+  dcop_detail_minload = list(
+    OP("/core_minload/MND1" "region"),
+    OP("/core_minload/MN1" "region"),
+    OP("/core_minload/MN3" "region"),
+    OP("/core_minload/MP3" "region"),
+    OP("/core_minload/MPP" "region")
+)
+  
+;;;;;;;;;;;;;;;;;;;;;;;
+;;; Stability check ;;;
+;;;;;;;;;;;;;;;;;;;;;;;
+  loopGainData = getData("loopGain" ?result "stb")
+  if(loopGainData != nil then
+      magDB = db(mag(loopGainData))
+      UGB_cross = cross(magDB 0 1 "either" nil nil)
+
+      if(UGB_cross != nil then
+          ugb_khz = round(UGB_cross/1e3)
+          av = value(magDB 1)
+          av_db = round(av)
+          pm = value(phaseDegUnwrapped(loopGainData) UGB_cross)
+          pm_deg = round(pm)
+      else
+          printf("WARNING: No UGB crossing\n")
+          ugb_khz = -1
+          av_db = -1
+          pm_deg = -1
+)
+  else
+    printf("WARNING: No loopGain data\n")
+    ugb_khz = -1
+    av_db = -1
+    pm_deg = -1
+)
+  
+;;;;;;;;;;;;;;;;;;
+;;;AC  check ;;;
+;;;;;;;;;;;;;;;;;;
+  psr_10k_maxload = value(db(vfreq('ac "/vreg_1")) 10000)
+  psr_1meg_maxload = value(db(vfreq('ac "/vreg_1")) 1000000)
+  psr_10k_minload = value(db(vfreq('ac "/vreg_2")) 10000)
+  psr_1meg_minload = value(db(vfreq('ac "/vreg_2")) 1000000)
+  
+  if(psr_10k_maxload != nil then psr_10k_maxload = abs(psr_10k_maxload) else psr_10k_maxload = -1)
+  if(psr_1meg_maxload != nil then psr_1meg_maxload = abs(psr_1meg_maxload) else psr_1meg_maxload = -1)
+  if(psr_10k_minload != nil then psr_10k_minload = abs(psr_10k_minload) else psr_10k_minload = -1)
+  if(psr_1meg_minload != nil then psr_1meg_minload = abs(psr_1meg_minload) else psr_1meg_minload = -1)
+  
+  psr_10k = round(min(psr_10k_maxload,psr_10k_minload))
+  psr_1meg = round(min(psr_1meg_maxload,psr_1meg_minload))
+  
+;;;;;;;;;;;;;;;;;;
+;;;TRAN  check ;;;
+;;;;;;;;;;;;;;;;;;
+  vout_loadreg_minload = value(vtime('tran "/vreg_5") 9.98e-07)
+  vout_loadreg_maxload = value(vtime('tran "/vreg_5") 8e-09)
+
+  if(vout_loadreg_minload != nil && vout_loadreg_maxload != nil then
+    load_regulation = round((abs(vout_loadreg_minload - vout_loadreg_maxload) / 0.0499) * 1000)
+  else
+    load_regulation = -1
+  )
+
+  vout_vinmax_minload = value(vtime('tran "/vreg_5") 9.98e-07)
+  vout_vinmin_minload = value(vtime('tran "/vreg_5") 8e-09)
+  vout_vinmax_maxload = value(vtime('tran "/vreg_4") 9.98e-07)
+  vout_vinmin_maxload = value(vtime('tran "/vreg_4") 8e-09)
+  
+  line_regulation_minload = -1
+  line_regulation_maxload = -1
+  
+  if(vout_vinmax_minload != nil && vout_vinmin_minload != nil then
+    line_regulation_minload = abs((vout_vinmax_minload - vout_vinmin_minload))*1000/0.24
+  )
+  
+  if(vout_vinmax_maxload != nil && vout_vinmin_maxload != nil then
+    line_regulation_maxload = abs((vout_vinmax_maxload - vout_vinmin_maxload))*1000/0.24
+  )
+  
+  line_regulation = round(max(line_regulation_minload,line_regulation_maxload))
+
+  vout_maxload = vout_loadreg_maxload
+  vout_minload = vout_loadreg_minload
+  
+  if(vout_maxload != nil then
+    vout_err_maxload = abs(round(vout_maxload*1000 - 800))
+  else
+    vout_err_maxload = -1
+  )
+  
+  if(vout_minload != nil then
+    vout_err_minload = abs(round(vout_minload*1000 - 800))
+  else
+    vout_err_minload = -1
+  )
+  
+  vout_err = max(vout_err_maxload,vout_err_minload)
+  
+  ;;; QUAN TRỌNG: Sửa phần này - tách riêng phép nhân
+  imaxload_current = OP("rload_maxload" "i")
+  if(imaxload_current != nil then
+    iq_maxload = round(abs(imaxload_current * 1e6) )
+    printf("Load current: %e A -> %d uA\n", imaxload_current, iq_maxload)
+
+  else
+    printf("ERROR: Cannot find rload_maxload current\n")
+    iq_maxload = -1
+  )
+
+  fileresult=outfile("./tb_core_results.txt") 
+    fprintf(fileresult "%d\n" dcop_check)
+    fprintf(fileresult "%d\n" load_regulation)
+    fprintf(fileresult "%d\n" line_regulation)
+    fprintf(fileresult "%d\n" vout_err)
+    fprintf(fileresult "%d\n" iq_maxload)
+    fprintf(fileresult "%d\n" psr_1meg)
+    fprintf(fileresult "%d\n" ugb_khz)
+    fprintf(fileresult "%d\n" av_db)
+    fprintf(fileresult "%d\n" pm_deg)
+    fprintf(fileresult "%d\n" nth(0 dcop_detail_maxload))
+    fprintf(fileresult "%d\n" nth(1 dcop_detail_maxload))
+    fprintf(fileresult "%d\n" nth(2 dcop_detail_maxload))
+    fprintf(fileresult "%d\n" nth(3 dcop_detail_maxload))
+    fprintf(fileresult "%d\n" nth(4 dcop_detail_maxload))
+    close(fileresult)
+) 
+
+khoitao()
+chay()
+exit
+
